@@ -72,7 +72,8 @@ The global and local workspace will work for cursor also. The directories will b
 
 The MCP server can be added to Claude Desktop app. Find the file claude_desktop_config.json. In MAC they will be available at 
 
-``` ~/Library/Application\ Support/Claude/claude_desktop_config.json
+` 
+~/Library/Application\ Support/Claude/claude_desktop_config.json
 
 
 
