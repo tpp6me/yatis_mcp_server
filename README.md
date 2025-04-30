@@ -20,6 +20,8 @@ It need Node version 20 and above
 3. Get location information
 4. For EVs get all battery information like voltage and SoC
 5. Get distance travelled and power consumed data in the past
+6. Get distance between 2 coordinates with Haversine
+
 
 ## Installation
 
