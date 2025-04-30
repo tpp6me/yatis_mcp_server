@@ -3,7 +3,7 @@ const { Server } = require("@modelcontextprotocol/sdk/server/index.js");
 const { StdioServerTransport } = require("@modelcontextprotocol/sdk/server/stdio.js");
 
 
-const API_ACCESS_KEY = process.env.YATIS_API_KEY ||  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiI2NTcyYTMyNzg3OWI5MTE0NmZkYWJmNzMiLCJpYXQiOjE3NDU4MzQ0Njk4ODEsImV4cCI6MTc0NTkyMDg2OTg4MX0.82151TRsZaA6B-mAZKpNJsLY_Oodv4Fi1L5MhdlwQsM";
+const API_ACCESS_KEY = process.env.YATIS_API_KEY ||  ""
 const server = new Server(
   { name: "yatis-mcp-server", version: "1.0.0" },
   { capabilities: { tools: {} } }
