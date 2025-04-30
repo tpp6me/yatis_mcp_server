@@ -3,12 +3,7 @@ const { Server } = require("@modelcontextprotocol/sdk/server/index.js");
 const { StdioServerTransport } = require("@modelcontextprotocol/sdk/server/stdio.js");
 
 
-const API_ACCESS_KEY = process.env.YATIS_API_KEY ||  ""
-// Log to console for debugging
-console.error("STARTING SIMPLIFIED YATIS SERVER");
-console.error("API_ACCESS_KEY: ", API_ACCESS_KEY);
-// Check if API_ACCESS_KEY is set
-// Create server
+const API_ACCESS_KEY = process.env.YATIS_API_KEY ||  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiI2NTcyYTMyNzg3OWI5MTE0NmZkYWJmNzMiLCJpYXQiOjE3NDU4MzQ0Njk4ODEsImV4cCI6MTc0NTkyMDg2OTg4MX0.82151TRsZaA6B-mAZKpNJsLY_Oodv4Fi1L5MhdlwQsM";
 const server = new Server(
   { name: "yatis-mcp-server", version: "1.0.0" },
   { capabilities: { tools: {} } }
@@ -25,20 +20,7 @@ const TOOLS = [
       required: []
     }
   },
-  {
-    name: "hello",
-    description: "A simple greeting tool",
-    inputSchema: {  // This MUST be inputSchema, not parameters
-      type: "object",
-      properties: {
-        name: {
-          type: "string",
-          description: "Name to greet (optional)"
-        }
-      },
-      required: []
-    }
-  },
+
   {
     name: "where",
     description: "A tool that returns the current location of a given device",
@@ -116,7 +98,33 @@ const TOOLS = [
       },
       required: []
     }
-  }
+  },
+  {
+    name: "distanceWithHaversine",
+    description: "Calculate the distance between 2 coordinates using the Haversine formula",
+    inputSchema: {
+      type: "object",
+      properties: {
+        lat1: {
+          type: "number",
+          description: "Latitude of the first point"
+        },
+        lon1: {
+          type: "number",
+          description: "Longitude of the first point"
+        },
+        lat2: {
+          type: "number",
+          description: "Latitude of the second point"
+        },
+        lon2: {
+          type: "number",
+          description: "Longitude of the second point"
+        }
+      },
+      required: ["lat1", "lon1", "lat2", "lon2"]
+    }
+  },
 ];
 
 // Handle all requests
@@ -128,7 +136,7 @@ server.fallbackRequestHandler = async (request) => {
     // Initialize
     if (method === "initialize") {
       return {
-        protocolVersion: "2024-11-05",
+        protocolVersion: "2025-04-30",
         capabilities: { tools: {} },
         serverInfo: { name: "yatis-mcp-server", version: "1.0.0" }
       };
@@ -428,6 +436,42 @@ server.fallbackRequestHandler = async (request) => {
         };
       }
 
+      if (name === "distanceWithHaversine") {
+        const { lat1, lon1, lat2, lon2 } = args;
+        if (!lat1 || !lon1 || !lat2 || !lon2) {
+          return {
+            error: {
+              code: -32602,
+              message: "Missing required parameters: lat1, lon1, lat2, lon2"
+            }
+          };
+        }
+
+        function haversine(lat1, lon1, lat2, lon2) {
+          const toRadians = (degree) => (degree * Math.PI) / 180;
+          const R = 6371; // Radius of the Earth in kilometers
+          const dLat = toRadians(lat2 - lat1);
+          const dLon = toRadians(lon2 - lon1);
+          const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(toRadians(lat1)) *
+              Math.cos(toRadians(lat2)) *
+              Math.sin(dLon / 2) *
+              Math.sin(dLon / 2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          return R * c; // Distance in kilometers
+        }
+
+        const distance = haversine(lat1, lon1, lat2, lon2);
+        return {
+          content: [
+            {
+              type: "text",
+              text: `The distance between the two points is ${distance.toFixed(2)} kilometers.`
+            }
+          ]
+        };
+      }
 
       return {
         error: {
